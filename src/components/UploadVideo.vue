@@ -2,31 +2,31 @@
     <div class="w-full h-screen bg-gray-800 p-4 text-gray-300 ">
         <div class="my-4">
             <h2>影片</h2>
-            <label v-if="transcript.length > 0" class="file-label"  @click="reset">重設</label>
+            <label v-if="transcript.length" class="file-label"  @click="reset">重設</label>
             <label v-else for="myFile" class="file-label">選擇</label>
-            <input id="myFile" type="file" @change="onFileChange" accept="video/*" class="file-input"  />   
+            <input ref="fileInput" id="myFile" type="file" @change="onFileChange" accept="video/*" class="file-input"  />   
         </div>
-        <div class="flex w-full justify-center border border-gray-600 shadow-md shadow-gray-500/50 rounded-md p-6 min-h-80">
-            <div v-if="transcript.length > 0" class="w-2/5 max-w-80 pr-4">
+        <div class="flex flex-col-reverse md:flex-row w-full justify-center items-center border border-gray-600 shadow-md shadow-gray-500/50 rounded-md p-6 min-h-80">
+            <div v-if="transcript.length" class="w-full md:w-2/5 max-w-80 pr-4">
                 <div v-for="(item, i) in transcript" :key="item.title" class="my-2">
                     <h3 class="font-bold text-gray-100">{{item.title}}</h3>
                     <div v-for="(section, index) in item.highlight" :key="index"
                         :class="{'active':isSelectedHighlight(calcTime(i*transcript.length + index))}"
                         @click="selectHighlight({...section, timeline:calcTime(i*transcript.length + index)})"
-                        class="text-sm cursor-pointer hover:text-blue-400">
+                        class="text-sm cursor-pointer hover:text-blue-300">
                         <span class="text-blue-400 mr-2">{{ calcTime(i*transcript.length + index) }}</span>
                         <span>{{ section.content }}</span>
                     </div>
                 </div>
             </div>
             <div v-else class="w-2/5 max-w-80 pr-4"></div>
-            <div class="w-3/5 max-w-96">
-                <video v-if="videoUrl" controls :src="videoUrl" @loadedmetadata="onMetadataLoaded" width="400"></video>
+            <div class="w-full md:w-3/5 max-w-[488px]">
+                <video v-if="videoUrl" controls :src="videoUrl" @loadedmetadata="onMetadataLoaded"></video>
                 <div v-else class="w-[400px] flex justify-center items-center h-60 border-2 border-dashed border-gray-400 bg-gray-200">
                     <span class="text-gray-600">Video</span>
                 </div>
                 <div class="flex justify-center">
-                    <div v-if="selectedHighlights.length" class="w-[356px] h-7 bg-gray-300 relative my-3">
+                    <div v-if="transcript.length" class="w-full max-w-[460px] h-7 bg-gray-300 relative my-3">
                         <div v-for="(highlight, index) in selectedHighlights" :key="index" 
                             :style="{ 'left': `${Math.floor((calcSec(highlight.timeline) / videoDuration) * 100)}%` }" 
                             class="absolute bg-blue-500 h-7 w-3 rounded-full cursor-pointer"
@@ -46,7 +46,8 @@ const videoUrl = ref('')
 const transcript = ref([])
 const videoDuration= ref(0)
 const selectedHighlights = ref([])
-const onFileChange =(event)=> {
+
+const onFileChange =(event: any)=> {
     const file = event.target.files[0];
     if (file && file.type.startsWith('video/')) {
         videoUrl.value = URL.createObjectURL(file); // 創建影片的 URL
@@ -55,10 +56,10 @@ const onFileChange =(event)=> {
         alert('請選擇一個有效的影片文件。');
     }
 }
-const onMetadataLoaded = (event)=> {
+const onMetadataLoaded = (event: any )=> {
     videoDuration.value = event.target.duration; // 獲取影片的時長
 }
-const isSelectedHighlight = (t) => {
+const isSelectedHighlight = (t:string) => {
     return selectedHighlights.value.some(highlight => 
         highlight.timeline === t
     );
@@ -70,7 +71,7 @@ const mockAIProcessing = ()=>{
             {
                 title: "Introduction",
                 highlight:[ 
-                    {timeline:"",content:"這是第一部分的重點句子。"},
+                    {timeline:"",content:"Hello~~"},
                     {timeline:"",content:"Today,we'll be showcasing our latest innovation"}
                 ]
             },
@@ -131,11 +132,13 @@ const playHighlight = (section)=>{
         videoElement.play(); // 播放影片
     }
 }
+const fileInput = ref(null)
 const reset = ()=>{
     transcript.value = []
     videoUrl.value = ''
     videoDuration.value = 0
     selectedHighlights.value = []
+    fileInput.value.value = null
 }
 </script>
 
@@ -159,7 +162,7 @@ const reset = ()=>{
     background-color: #357ab8;
 }
 .active{
-    background: rgba(64, 158, 255, 0.2)
+    background: rgba(64, 158, 255, 0.)
 }
 .custom-video-player {
     width: 100%; /* 使视频播放器宽度占满父容器 */
