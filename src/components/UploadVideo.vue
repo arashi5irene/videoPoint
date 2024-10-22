@@ -42,8 +42,20 @@
 
 <script setup lang="ts">
 import {ref} from 'vue' 
+
+// 定義類型
+interface Highlight {
+    timeline: string;
+    content: string;
+}
+
+interface TranscriptItem {
+    title: string;
+    highlight: Highlight[];
+}
+
 const videoUrl = ref('')
-const transcript = ref([])
+const transcript = ref<TranscriptItem[]>([])
 const videoDuration= ref(0)
 const selectedHighlights = ref([])
 
@@ -60,7 +72,7 @@ const onMetadataLoaded = (event: any )=> {
     videoDuration.value = event.target.duration; // 獲取影片的時長
 }
 const isSelectedHighlight = (t:string) => {
-    return selectedHighlights.value.some(highlight => 
+    return selectedHighlights.value.some((highlight:Highlight) => 
         highlight.timeline === t
     );
 }
@@ -97,7 +109,7 @@ const mockAIProcessing = ()=>{
         transcript.value = mockResponse; // 將模擬數據賦值給 transcript
     }, 1000);
 }
-const calcTime = (i)=>{
+const calcTime = (i:number)=>{
     const section = Math.floor(videoDuration.value/11)
     const sectionSec = i < 2?section * (i + 1):i<6?section * (i + 2):section * (i + 3)
     
@@ -105,12 +117,12 @@ const calcTime = (i)=>{
     const sec = sectionSec - (min * 60)
     return `${min}:${sec}`
 }
-const calcSec = (t)=>{
+const calcSec = (t:string)=>{
     const timeArr =t.split(':')
     console.log('t', t, timeArr)
     return Number(timeArr[0])*60 + Number(timeArr[1])
 }
-const selectHighlight = (section)=> {
+const selectHighlight = (section: Highlight)=> {
      // 檢查 selectedHighlights 中是否已存在該重點片段
     const exists = selectedHighlights.value.some(highlight => highlight.timeline === section.timeline && highlight.content === section.content);
     if (!exists) {
@@ -138,7 +150,9 @@ const reset = ()=>{
     videoUrl.value = ''
     videoDuration.value = 0
     selectedHighlights.value = []
-    fileInput.value.value = null
+    if (fileInput.value) {
+        fileInput.value.value = null;
+    }
 }
 </script>
 
